@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>restaurant-stream</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; }
+  input { width: 70%; padding: 8px; }
+  button { padding: 8px 16px; }
+  #popup { margin-top: 20px; padding: 16px; border: 1px solid #ccc; border-radius: 8px; display: none; }
+  #popup.show { display: block; }
+  .match { padding: 8px 0; border-bottom: 1px solid #eee; }
+</style>
+</head>
+<body>
+  <h1>Ask about a Bangalore restaurant</h1>
+  <input id="text" placeholder="e.g. North Indian in Banashankari">
+  <button onclick="ask()">Ask</button>
+  <div id="status"></div>
+  <div id="popup"></div>
+
+<script>
+const BACKEND = "http://localhost:8000";
+
+async function ask() {
+  const text = document.getElementById("text").value;
+  const status = document.getElementById("status");
+  const popup = document.getElementById("popup");
+  popup.classList.remove("show");
+  status.textContent = "Submitting...";
+
+  const res = await fetch(BACKEND + "/query", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  });
+  const { id } = await res.json();
+  status.textContent = "Waiting for Flink to process (id: " + id + ")...";
+
+  const es = new EventSource(BACKEND + "/stream/" + id);
+  es.addEventListener("result", (e) => {
+    const data = JSON.parse(e.data);
+    status.textContent = "Got a match!";
+    popup.innerHTML = "<h3>Matches for: " + data.query + "</h3>" +
+      data.matches.map(m =>
+        `<div class="match"><b>${m.name}</b> — ${m.location}<br>${m.cuisines} · ${m.rate} · ₹${m.approxCost} for two</div>`
+      ).join("") || "<p>No matches found.</p>";
+    popup.classList.add("show");
+    es.close();
+  });
+  es.addEventListener("timeout", () => {
+    status.textContent = "Timed out waiting for a match.";
+    es.close();
+  });
+}
+</script>
+</body>
+</html>

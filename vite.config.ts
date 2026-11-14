@@ -1,11 +1,21 @@
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { resolve } from 'node:path';
 
 const backend = process.env.BACKEND_URL ?? 'http://localhost:8000';
 
 export default defineConfig({
   plugins: [react()],
+  // Two pages: / is the hotel site, /digital-twin/ is the React lab.
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        twin: resolve(__dirname, 'digital-twin/index.html'),
+      },
+    },
+  },
   server: {
     port: 5173,
     strictPort: true,

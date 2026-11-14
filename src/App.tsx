@@ -9,16 +9,15 @@ import { QuickActions } from './components/QuickActions';
 import { RecommendationPopup } from './components/RecommendationPopup';
 import { RecordingBar } from './components/RecordingBar';
 import { RestaurantDetail } from './components/RestaurantDetail';
+import { SiteNav } from './components/SiteNav';
 import { useBackendHealth } from './hooks/useBackendHealth';
 import { useConversation } from './hooks/useConversation';
-import { useReveal } from './hooks/useReveal';
 import type { RecommendationEvent, RestaurantCard } from './types';
 
 export default function App() {
   const c = useConversation();
   const online = useBackendHealth();
   const { state } = c;
-  useReveal();
 
   const [popup, setPopup] = useState<RecommendationEvent | null>(null);
   const [drawerSeq, setDrawerSeq] = useState<string | null>(null);
@@ -63,80 +62,76 @@ export default function App() {
   const ready = online !== false && !!c.sessionId;
 
   return (
-    <div className="app">
-      <header className="hero">
-        <nav className="nav">
-          <div className="brand">
-            <span className="logo" aria-hidden="true">🍽</span>
-            <span>Omnifood <b>Twin</b></span>
-          </div>
-          <ul className="nav-links">
-            <li><a href="#live">Live conversation</a></li>
-            <li><a href="#how">How it works</a></li>
-          </ul>
-        </nav>
-
-        <div className="hero-inner">
-          <h1>Goodbye endless scrolling.<br /><span>Hello table for two.</span></h1>
-          <p className="hero-sub">Talk about food with a friend. An always-listening digital twin streams every sentence
-            through Kinesis and Apache Flink, and pops up the right place from 12,000+ Bangalore restaurants.</p>
+    <div className="tw-app">
+      <header className="tw-hero">
+        <SiteNav />
+        <div className="tw-hero-inner">
+          <h1>Talk about food<br />We find the table</h1>
+          <p className="tw-hero-sub">An always-listening digital twin streams every sentence through Kinesis and Apache Flink,
+            and pops up the right place from 12,000+ Bangalore restaurants. Just talk.</p>
 
           <RecordingBar
             micState={c.micState}
             micError={c.micError}
-            speaker={state.speaker}
-            onToggleSpeaker={() => c.dispatch({ type: 'toggleSpeaker' })}
-            onSetSpeaker={(s) => c.dispatch({ type: 'setSpeaker', speaker: s })}
             onStart={c.startListening}
             onStop={c.stopListening}
             disabled={!ready}
           />
 
-          <div className="status-row">
-            <span className={`status-badge ${online ? 'ok' : online === false ? 'bad' : ''}`}>
+          <div className="tw-status-row">
+            <span className={`tw-status ${online ? 'is-ok' : online === false ? 'is-bad' : ''}`}>
               {online === false ? <WifiOff size={14} /> : <Server size={14} />}
               {online == null ? 'Checking backend…' : online ? 'Backend online' : 'Backend offline'}
             </span>
-            <span className={`status-badge ${c.sse.isConnected ? 'ok' : ''}`}>
+            <span className={`tw-status ${c.sse.isConnected ? 'is-ok' : ''}`}>
               <Radio size={14} /> {c.sse.isConnected ? 'Live stream connected' : 'Live stream idle'}
             </span>
-            {c.sessionId && <span className="status-badge mono" title="Session id">{c.sessionId.slice(0, 14)}…</span>}
           </div>
         </div>
       </header>
 
       {(online === false || c.sessionError) && (
-        <div className="banner" role="alert">
+        <div className="tw-banner" role="alert">
           <b>Backend offline.</b> The pipeline (Floci → Flink → backend) isn't reachable on <code>/api</code>.
-          Start it, then <button type="button" className="link" onClick={c.createSession}>retry</button>.
+          Start it, then <button type="button" className="tw-link" onClick={c.createSession}>retry</button>.
         </div>
       )}
-      {c.sendError && online !== false && <div className="banner warn" role="alert">{c.sendError}</div>}
+      {c.sendError && online !== false && <div className="tw-banner is-warn" role="alert">{c.sendError}</div>}
 
-      <section id="live" className="section">
-        <h2 className="section-title reveal">The conversation, live</h2>
-        <p className="section-lead reveal">Both speakers, every sentence, and what the twin made of it.</p>
-        <div className="layout">
-          <div className="col-main reveal">
-            <ConversationFeed state={state} onOpenEvent={openEvent} />
-          </div>
-          <div className="col-side reveal">
-            <ContextTracker context={state.context} focusedName={focused?.name ?? null} latest={state.latest} />
-            <LivePanel lastList={lastList} focusedId={focusedId} onChoose={c.focusRestaurant} />
-            <HistoryPanel sessionId={c.sessionId} />
+      <section id="live" className="tw-section tw-grey">
+        <div className="row">
+          <h2>The conversation, live</h2>
+          <p className="long-copy tw-lead">Every sentence, and what the twin made of it.</p>
+          <div className="tw-grid">
+            <div className="tw-col">
+              <ConversationFeed state={state} onOpenEvent={openEvent} />
+            </div>
+            <div className="tw-col">
+              <ContextTracker context={state.context} focusedName={focused?.name ?? null} />
+              <LivePanel lastList={lastList} focusedId={focusedId} onChoose={c.focusRestaurant} />
+              <HistoryPanel sessionId={c.sessionId} />
+            </div>
           </div>
         </div>
       </section>
 
       <HowItWorks />
 
-      <footer className="footer">
-        <div className="brand"><span className="logo" aria-hidden="true">🍽</span><span>Omnifood <b>Twin</b></span></div>
-        <p>Data: Zomato Bangalore dataset (Kaggle) · Web Speech → FastAPI → Kinesis → Flink → Kinesis + DynamoDB → SSE</p>
+      <footer>
+        <div className="row">
+          <ul className="footer-nav">
+            <li><a href="/">Home</a></li>
+            <li><a href="#live">Live</a></li>
+            <li><a href="#how">How it works</a></li>
+          </ul>
+        </div>
+        <div className="row">
+          <p>Data: Zomato Bangalore dataset (Kaggle) · Web Speech → FastAPI → Kinesis → Flink → Kinesis + DynamoDB → SSE</p>
+        </div>
       </footer>
 
       <QuickActions
-        onSend={(t) => c.sendFinal(t, state.speaker)}
+        onSend={(t) => c.sendFinal(t)}
         onDemo={c.runDemo}
         demoRunning={c.demoRunning}
         onReset={c.resetConversation}
@@ -153,7 +148,7 @@ export default function App() {
 
       {drawerEvent?.restaurant && (
         <>
-          <div className="scrim" onClick={() => setDrawerSeq(null)} />
+          <div className="tw-scrim" onClick={() => setDrawerSeq(null)} />
           <RestaurantDetail restaurant={drawerEvent.restaurant} answer={drawerEvent.answer} onClose={() => setDrawerSeq(null)} />
         </>
       )}

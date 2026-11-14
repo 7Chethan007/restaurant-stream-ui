@@ -30,48 +30,48 @@ export function RecommendationPopup({ event, focusedId, onChoose, onOpenDetail, 
   return (
     <div
       key={event.sequenceNumber}
-      className={`popup draggable-popup popup-${event.eventType.toLowerCase()}`}
+      className={`tw-popup draggable-popup is-${event.eventType.toLowerCase()}`}
       style={style}
       role="dialog"
       aria-label={event.headline}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <header className="popup-head" onPointerDown={handlePointerDown}>
-        <GripHorizontal size={16} className="grip" />
+      <header className="tw-popup-head" onPointerDown={handlePointerDown}>
+        <GripHorizontal size={16} className="tw-grip" />
         <div>
-          <span className="eyebrow">Heard “{event.transcript_text}”</span>
+          <span className="tw-eyebrow">{event.transcript_text ? `Heard “${event.transcript_text}”` : 'You chose a place'}</span>
           <h3>{event.headline}</h3>
         </div>
-        <button type="button" className="icon-btn" onClick={onClose} aria-label="Dismiss"><X size={16} /></button>
+        <button type="button" className="tw-icon-btn" onClick={onClose} aria-label="Dismiss"><X size={16} /></button>
       </header>
 
-      <div className="popup-body">
+      <div className="tw-popup-body">
         {event.eventType === 'RECOMMENDATIONS' && (event.recommendations ?? []).map((r, i) => (
           <RestaurantCardView key={r.id} r={r} rank={i + 1} focused={r.id === focusedId} onChoose={onChoose} compact={i > 1} />
         ))}
 
         {event.eventType === 'RESTAURANT_ANSWER' && event.restaurant && (
-          <div className="popup-answer">
-            <p className="answer-text">{event.answer?.text}</p>
+          <div className="tw-answer">
+            <p className="tw-answer-text">{event.answer?.text}</p>
             {event.answer && event.answer.facts.length > 0 && (
-              <dl className="facts">
+              <dl className="tw-facts">
                 {event.answer.facts.slice(0, 4).map((f) => (
-                  <div key={f.label} className="fact"><dt>{f.label}</dt><dd>{f.value}</dd></div>
+                  <div key={f.label} className="tw-fact"><dt>{f.label}</dt><dd>{f.value}</dd></div>
                 ))}
               </dl>
             )}
-            <button type="button" className="btn btn-primary btn-sm" onClick={() => onOpenDetail(event.sequenceNumber)}>
+            <button type="button" className="tw-btn tw-btn-full tw-btn-sm" onClick={() => onOpenDetail(event.sequenceNumber)}>
               Open {event.restaurant.name}
             </button>
           </div>
         )}
 
         {event.eventType === 'NO_MATCH' && (
-          <p className="muted">No restaurant in the data fits all of that. Try a nearby area, another dish, or a bigger budget.</p>
+          <p className="tw-muted">No restaurant in the data fits all of that. Try a nearby area, another dish, or a bigger budget.</p>
         )}
       </div>
-      {!hovered && <div className="popup-timer" style={{ animationDuration: `${POPUP_AUTO_DISMISS_MS}ms` }} />}
+      {!hovered && <div className="tw-popup-timer" style={{ animationDuration: `${POPUP_AUTO_DISMISS_MS}ms` }} />}
     </div>
   );
 }

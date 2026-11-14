@@ -24,17 +24,18 @@ export function QuickActions({ onSend, onDemo, demoRunning, onReset, disabled }:
   }, [open]);
 
   return (
-    <div className={`fab-wrap ${open ? 'is-open' : ''}`}>
+    <div className={`tw-fab-wrap ${open ? 'is-open' : ''}`}>
       {open && (
-        <div className="fab-panel" role="dialog" aria-label="Quick actions">
-          <span className="eyebrow">Ask once, by typing</span>
+        <div className="tw-fab-panel" role="dialog" aria-label="Quick actions">
+          <span className="tw-eyebrow">Ask once, by typing</span>
           <form
-            className="manual"
+            className="tw-manual"
             onSubmit={(e) => { e.preventDefault(); if (text.trim()) { onSend(text); setText(''); } }}
           >
-            <label htmlFor="manual-text" className="sr-only">Type a line as the current speaker</label>
+            <label htmlFor="manual-text" className="tw-sr-only">Type a line to send</label>
             <input
               id="manual-text"
+              className="tw-input"
               ref={inputRef}
               value={text}
               maxLength={1000}
@@ -42,16 +43,16 @@ export function QuickActions({ onSend, onDemo, demoRunning, onReset, disabled }:
               placeholder="e.g. biryani in Indiranagar"
               disabled={disabled}
             />
-            <button type="submit" className="btn btn-primary" disabled={disabled || !text.trim()} aria-label="Ask">
+            <button type="submit" className="tw-btn tw-btn-full" disabled={disabled || !text.trim()} aria-label="Ask">
               <Send size={16} />
             </button>
           </form>
-          <div className="fab-actions">
-            <button type="button" className="btn btn-outline btn-sm" onClick={onDemo} disabled={disabled && !demoRunning}>
+          <div className="tw-fab-actions">
+            <button type="button" className="tw-btn tw-btn-ghost tw-btn-sm" onClick={onDemo} disabled={disabled && !demoRunning}>
               {demoRunning ? <Square size={14} /> : <Play size={14} />}
               {demoRunning ? 'Stop demo' : 'Play demo conversation'}
             </button>
-            <button type="button" className="btn btn-ghost btn-sm" onClick={onReset} title="Clear context and start fresh">
+            <button type="button" className="tw-btn tw-btn-ghost tw-btn-sm" onClick={onReset} title="Clear context and start fresh">
               <RotateCcw size={14} /> Reset
             </button>
           </div>
@@ -59,13 +60,13 @@ export function QuickActions({ onSend, onDemo, demoRunning, onReset, disabled }:
       )}
       <button
         type="button"
-        className="fab"
+        className="tw-fab"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         aria-label={open ? 'Close quick actions' : 'Open quick actions: type a line or play the demo'}
       >
         {open ? <X size={22} /> : <Keyboard size={22} />}
-        {demoRunning && !open && <span className="fab-dot" aria-hidden="true" />}
+        {demoRunning && !open && <span className="tw-fab-dot" aria-hidden="true" />}
       </button>
     </div>
   );

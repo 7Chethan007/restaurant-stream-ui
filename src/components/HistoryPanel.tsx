@@ -19,24 +19,24 @@ export function HistoryPanel({ sessionId }: { sessionId: string | null }) {
   };
 
   return (
-    <details className="card history" onToggle={(e) => { if ((e.target as HTMLDetailsElement).open && !items) load(); }}>
-      <summary className="card-head">
-        <h2><History size={16} /> Stored history</h2>
-        <span className="muted small">DynamoDB</span>
+    <details className="tw-card tw-history" onToggle={(e) => { if ((e.target as HTMLDetailsElement).open && !items) load(); }}>
+      <summary className="tw-card-head">
+        <h3><History size={16} /> Stored history</h3>
+        <span className="tw-muted">DynamoDB</span>
       </summary>
-      <div className="history-body">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={load} disabled={loading || !sessionId}>
-          <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh
+      <div className="tw-history-body">
+        <button type="button" className="tw-btn tw-btn-ghost tw-btn-sm" onClick={load} disabled={loading || !sessionId}>
+          <RefreshCw size={14} className={loading ? 'tw-spin' : ''} /> Refresh
         </button>
-        {error && <p className="inline-error">{error}</p>}
-        {items && items.length === 0 && <p className="muted small">Nothing stored yet for this session.</p>}
+        {error && <p className="tw-error">{error}</p>}
+        {items && items.length === 0 && <p className="tw-muted">Nothing stored yet for this session.</p>}
         {items && items.length > 0 && (
-          <ol className="history-list">
+          <ol className="tw-history-list">
             {items.map((it) => (
               <li key={`${it.timestamp}-${it.event?.sequenceNumber}`}>
-                <time className="tiny muted">{formatClock(it.timestamp)}</time>
-                <span className="history-transcript">“{it.transcript}”</span>
-                <span className="history-headline">{it.event?.headline}</span>
+                <time className="tw-muted">{formatClock(it.timestamp)}</time>
+                <span className="tw-history-line">“{it.transcript}”</span>
+                <span className="tw-history-headline">{it.event?.headline}</span>
               </li>
             ))}
           </ol>

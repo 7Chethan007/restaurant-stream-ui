@@ -33,7 +33,7 @@ shapes are defined by the backend contract; see `src/types/index.ts`.
 | `src/hooks/useConversation.ts` | Session lifecycle, sending transcripts, mic, demo script, focus/reset |
 | `src/hooks/conversationReducer.ts` | Transcript lines per speaker, events deduped by `sequenceNumber`, latest context |
 | `src/hooks/usePopupManager.ts` | Draggable popup position |
-| `src/components/RecordingBar.tsx` | The hero's call to action: start/stop, HH:MM:SS timer, live waveform (`AudioVisualizer`), speaker toggle |
+| `src/components/RecordingBar.tsx` | The hero's call to action: start/stop, HH:MM:SS timer, live waveform (`AudioVisualizer`),  |
 | `src/components/QuickActions.tsx` | Bottom-right floating button: type a line, play the demo conversation, reset |
 | `src/components/ConversationFeed.tsx` | Chat bubbles per speaker + the system's reaction under each line |
 | `src/components/ContextTracker.tsx` | Location · Cuisine · Dish · Budget · Chosen place |
@@ -82,3 +82,10 @@ current speaker is attached to each sentence. Click **Choose this place** on a c
 "how much does it cost?" or "what's on the menu?".
 
 Note: Zomato's data lists menu dish names only, with no per-dish prices — price answers use cost for two.
+
+## Pages
+
+- `/` is the Omnifood hotel site (copied from `7Chethan007/HotelWebsite` into `public/`), plus one nav pill, "Digital Twin Lab".
+- `/digital-twin/` is the React lab. It reuses the hotel stylesheets, so nav, buttons and headings match.
+- Vite builds both pages (`vite.config.ts`). nginx serves `/digital-twin/` through its directory index (`try_files $uri $uri/`).
+- There are no speakers: the page just listens. The bottom-right button holds typing, the demo conversation and reset.

@@ -16,11 +16,33 @@
   <h1>Ask about a Bangalore restaurant</h1>
   <input id="text" placeholder="e.g. North Indian in Banashankari">
   <button onclick="ask()">Ask</button>
+  <button id="mic" onclick="listen()">🎤</button>
   <div id="status"></div>
   <div id="popup"></div>
 
 <script>
 const BACKEND = "http://localhost:8000";
+
+// Native browser speech-to-text -- no server, no dependency.
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognizer = SpeechRecognition ? new SpeechRecognition() : null;
+if (recognizer) {
+  recognizer.lang = "en-IN";
+  recognizer.onresult = (e) => {
+    document.getElementById("text").value = e.results[0][0].transcript;
+    ask();
+  };
+  recognizer.onerror = () => { document.getElementById("status").textContent = "Mic error — check permissions."; };
+}
+
+function listen() {
+  if (!recognizer) {
+    document.getElementById("status").textContent = "Speech recognition not supported in this browser.";
+    return;
+  }
+  document.getElementById("status").textContent = "Listening...";
+  recognizer.start();
+}
 
 async function ask() {
   const text = document.getElementById("text").value;

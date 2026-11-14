@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDurationHMS, formatRupees, priceBand } from '../utils/format';
+import { cardPhoto, formatDurationHMS, formatRupees, priceBand } from '../utils/format';
 
 describe('formatDurationHMS', () => {
   it('pads hours, minutes and seconds', () => {
@@ -25,5 +25,12 @@ describe('formatRupees', () => {
   it('formats with Indian grouping', () => {
     expect(formatRupees(150000)).toBe('₹1,50,000');
     expect(formatRupees(null)).toBe('n/a');
+  });
+});
+
+describe('cardPhoto', () => {
+  it('is stable per id and stays within the 8 hotel photos', () => {
+    expect(cardPhoto('a1b2c3d4e5f6')).toBe(cardPhoto('a1b2c3d4e5f6'));
+    for (const id of ['x', 'abc', '0123456789ab', 'zzzzzzzzzzzz']) expect(cardPhoto(id)).toMatch(/^\/Resources\/img\/[1-8]\.jpg$/);
   });
 });

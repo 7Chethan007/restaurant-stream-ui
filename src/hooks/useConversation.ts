@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { DEMO_GAP_MS, DEMO_SCRIPT } from '../constants';
-import type { RecommendationEvent, SpeakerId } from '../types';
+import type { RecommendationEvent } from '../types';
 import { api } from '../utils/api';
+import { createFinalizer } from '../utils/interimFinalizer';
 import { ConnectionState, persistentSpeechRecognition } from '../utils/persistentSpeechRecognition';
 import { conversationReducer, initialConversation } from './conversationReducer';
 import { useSessionSSE } from './useSessionSSE';
@@ -16,9 +17,9 @@ export function useConversation() {
   const [micError, setMicError] = useState<string | null>(null);
   const [demoRunning, setDemoRunning] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const speakerRef = useRef<SpeakerId>(state.speaker);
-  speakerRef.current = state.speaker;
   const demoCancel = useRef(false);
+  const finalizerRef = useRef<ReturnType<typeof createFinalizer> | null>(null);
+  const confidenceRef = useRef(1);
 
   const createSession = useCallback(async () => {
     try {
@@ -34,13 +35,13 @@ export function useConversation() {
   const onEvent = useCallback((e: RecommendationEvent) => dispatch({ type: 'event', event: e }), []);
   const sse = useSessionSSE(sessionId, onEvent);
 
-  const sendFinal = useCallback(async (text: string, speakerId: SpeakerId, confidence = 1) => {
+  const sendFinal = useCallback(async (text: string, confidence = 1) => {
     const clean = text.trim();
     if (!clean || !sessionId) return;
-    dispatch({ type: 'final', id: newId(), text: clean, timestamp: Date.now(), speakerId });
+    dispatch({ type: 'final', id: newId(), text: clean, timestamp: Date.now() });
     try {
       setSendError(null);
-      await api.sendTranscript(sessionId, clean, speakerId, confidence, false);
+      await api.sendTranscript(sessionId, clean, confidence, false);
     } catch (e) {
       setSendError(`Could not send to backend: ${(e as Error).message}`);
     }
@@ -53,14 +54,17 @@ export function useConversation() {
 
   const startListening = useCallback(() => {
     setMicError(null);
+    const finalizer = createFinalizer((text) => sendFinal(text, confidenceRef.current));
+    finalizerRef.current = finalizer;
     persistentSpeechRecognition.start((r) => {
-      if (r.isPartial) dispatch({ type: 'partial', text: r.text });
-      else sendFinal(r.text, speakerRef.current, r.confidence);
+      confidenceRef.current = r.confidence;
+      if (r.isPartial) { dispatch({ type: 'partial', text: r.text }); finalizer.partial(r.text); }
+      else finalizer.final(r.text);
     });
   }, [sendFinal]);
 
-  const stopListening = useCallback(() => persistentSpeechRecognition.stop(), []);
-  useEffect(() => () => persistentSpeechRecognition.stop(), []);
+  const stopListening = useCallback(() => { finalizerRef.current?.cancel(); persistentSpeechRecognition.stop(); }, []);
+  useEffect(() => () => { finalizerRef.current?.cancel(); persistentSpeechRecognition.stop(); }, []);
 
   const focusRestaurant = useCallback(async (restaurantId: string) => {
     if (!sessionId) return;
@@ -81,8 +85,7 @@ export function useConversation() {
     setDemoRunning(true);
     for (const step of DEMO_SCRIPT) {
       if (demoCancel.current) break;
-      dispatch({ type: 'setSpeaker', speaker: step.speakerId });
-      await sendFinal(step.text, step.speakerId);
+      await sendFinal(step);
       await new Promise((r) => setTimeout(r, DEMO_GAP_MS));
     }
     setDemoRunning(false);

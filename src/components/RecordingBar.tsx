@@ -3,8 +3,6 @@ import { useEffect, useState } from 'react';
 import { ConnectionState } from '../utils/persistentSpeechRecognition';
 import { formatDurationHMS } from '../utils/format';
 import { AudioVisualizer } from './AudioVisualizer';
-import { SpeakerToggle } from './SpeakerToggle';
-import type { SpeakerId } from '../types';
 
 const STATE_LABEL: Record<ConnectionState, string> = {
   [ConnectionState.DISCONNECTED]: 'Not listening',
@@ -17,9 +15,6 @@ const STATE_LABEL: Record<ConnectionState, string> = {
 interface Props {
   micState: ConnectionState;
   micError: string | null;
-  speaker: SpeakerId;
-  onToggleSpeaker: () => void;
-  onSetSpeaker: (s: SpeakerId) => void;
   onStart: () => void;
   onStop: () => void;
   disabled: boolean;
@@ -38,11 +33,11 @@ export function RecordingBar(p: Props) {
   }, [live]);
 
   return (
-    <section className="recording-bar glass-dark" aria-label="Listening controls">
-      <div className="recording-row">
+    <section className="tw-listen" aria-label="Listening controls">
+      <div className="tw-listen-row">
         <button
           type="button"
-          className={`btn btn-primary btn-listen ${live ? 'is-live' : ''}`}
+          className={`tw-btn tw-btn-full ${live ? 'is-live' : ''}`}
           onClick={live ? p.onStop : p.onStart}
           disabled={p.disabled && !live}
           aria-pressed={live}
@@ -51,22 +46,16 @@ export function RecordingBar(p: Props) {
           {live ? 'Stop listening' : 'Start listening'}
         </button>
 
-        <div className={`visualizer-pill ${live ? 'is-live' : ''} ${p.micState === ConnectionState.ERROR ? 'is-error' : ''}`}>
-          <span className="timer">{formatDurationHMS(live ? seconds : 0)}</span>
+        <div className={`tw-meter ${live ? 'is-live' : ''} ${p.micState === ConnectionState.ERROR ? 'is-error' : ''}`}>
+          <span className="tw-timer">{formatDurationHMS(live ? seconds : 0)}</span>
           <AudioVisualizer isActive={live} />
-          <span className="pill-status" role="status">
-            {p.micState === ConnectionState.ERROR ? <MicOff size={14} /> : <span className={`dot ${live ? 'dot-live' : ''}`} />}
+          <span className="tw-meter-status" role="status">
+            {p.micState === ConnectionState.ERROR ? <MicOff size={14} /> : <span className={`tw-dot ${live ? 'is-live' : ''}`} />}
             {STATE_LABEL[p.micState]}
           </span>
         </div>
       </div>
-
-      <div className="recording-row secondary">
-        <SpeakerToggle speaker={p.speaker} onSet={p.onSetSpeaker} onToggle={p.onToggleSpeaker} />
-        <a className="btn btn-outline-light btn-sm" href="#live">See the conversation ↓</a>
-      </div>
-
-      {p.micError && <p className="inline-error" role="alert">{p.micError}</p>}
+      {p.micError && <p className="tw-error" role="alert">{p.micError}</p>}
     </section>
   );
 }

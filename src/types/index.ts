@@ -1,5 +1,3 @@
-export type SpeakerId = 'speaker_1' | 'speaker_2';
-
 export interface Review {
   rating: number | null;
   text: string;
@@ -55,7 +53,7 @@ export interface RecommendationEvent {
   eventType: EventType;
   timestamp: number;
   transcript_text: string;
-  speakerId: string;
+  speakerId?: string;
   context: ConversationContext;
   headline: string;
   recommendations?: RestaurantCard[];
@@ -65,7 +63,6 @@ export interface RecommendationEvent {
 
 export interface TranscriptLine {
   id: string;
-  speakerId: SpeakerId;
   text: string;
   timestamp: number;
   /** sequenceNumber of the event this line triggered, once it arrives */
@@ -74,7 +71,6 @@ export interface TranscriptLine {
 
 export interface HistoryItem {
   timestamp: number;
-  speakerId: string;
   transcript: string;
   event: RecommendationEvent;
 }

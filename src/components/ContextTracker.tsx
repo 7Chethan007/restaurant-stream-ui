@@ -1,12 +1,11 @@
 /** What the twin currently "knows" about the conversation, like POD's CategoryTracker. */
 import { IndianRupee, MapPin, Soup, Store, UtensilsCrossed } from 'lucide-react';
-import type { ConversationContext, RecommendationEvent } from '../types';
+import type { ConversationContext } from '../types';
 import { formatRupees } from '../utils/format';
 
 interface Props {
   context: ConversationContext;
   focusedName: string | null;
-  latest: RecommendationEvent | null;
 }
 
 export function ContextTracker({ context, focusedName }: Props) {
@@ -15,30 +14,28 @@ export function ContextTracker({ context, focusedName }: Props) {
     { key: 'cuisine', label: 'Cuisine', icon: UtensilsCrossed, value: context.cuisines.join(', ') || null },
     { key: 'dish', label: 'Dish', icon: Soup, value: context.dishes.join(', ') || null },
     { key: 'budget', label: 'Budget', icon: IndianRupee,
-      value: context.maxCostForTwo != null ? `≤ ${formatRupees(context.maxCostForTwo)} for two` : null },
+      value: context.maxCostForTwo != null ? `up to ${formatRupees(context.maxCostForTwo)} for two` : null },
     { key: 'place', label: 'Chosen place', icon: Store,
       value: context.focusedRestaurantId ? (focusedName ?? 'Selected') : null },
   ];
   const filled = steps.filter((s) => s.value).length;
 
   return (
-    <section className="card context-tracker" aria-label="Conversation context">
-      <header className="card-head">
-        <h2>What we heard</h2>
-        <span className="muted small">{filled}/{steps.length} signals</span>
+    <section className="tw-card" aria-label="Conversation context">
+      <header className="tw-card-head">
+        <h3>What we understood</h3>
+        <span className="tw-muted">{filled}/{steps.length}</span>
       </header>
-      <ol className="tracker">
+      <ol className="tw-tracker">
         {steps.map(({ key, label, icon: Icon, value }) => (
-          <li key={key} className={`tracker-step ${value ? 'is-filled' : ''}`}>
-            <span className="tracker-icon"><Icon size={16} /></span>
-            <span className="tracker-label">{label}</span>
-            <span className="tracker-value" title={value ?? undefined}>{value ?? '—'}</span>
+          <li key={key} className={value ? 'is-filled' : ''}>
+            <span className="tw-tracker-icon"><Icon size={16} /></span>
+            <span className="tw-tracker-label">{label}</span>
+            <span className="tw-tracker-value" title={value ?? undefined}>{value ?? '—'}</span>
           </li>
         ))}
       </ol>
-      <div className="tracker-progress" aria-hidden="true">
-        <span style={{ width: `${(filled / steps.length) * 100}%` }} />
-      </div>
+      <div className="tw-progress" aria-hidden="true"><span style={{ width: `${(filled / steps.length) * 100}%` }} /></div>
     </section>
   );
 }

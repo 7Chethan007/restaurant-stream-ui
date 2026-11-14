@@ -4,19 +4,17 @@ import type { RecommendationEvent } from '../types';
 
 const ev = (seq: string, text: string): RecommendationEvent => ({
   sessionId: 's', sequenceNumber: seq, eventType: 'RECOMMENDATIONS', timestamp: 1, transcript_text: text,
-  speakerId: 'speaker_1', headline: 'h', recommendations: [],
+  headline: 'h', recommendations: [],
   context: { location: 'Basavanagudi', cuisines: [], dishes: ['Masala Dosa'], maxCostForTwo: null, minRating: null, focusedRestaurantId: null },
 });
 
 describe('conversationReducer', () => {
-  it('toggles speaker and stamps final lines with the current speaker', () => {
-    let s = conversationReducer(initialConversation, { type: 'toggleSpeaker' });
-    expect(s.speaker).toBe('speaker_2');
-    s = conversationReducer(s, { type: 'partial', text: 'i want' });
-    expect(s.partial).toEqual({ speakerId: 'speaker_2', text: 'i want' });
+  it('turns partial text into a final line', () => {
+    let s = conversationReducer(initialConversation, { type: 'partial', text: 'i want' });
+    expect(s.partial).toBe('i want');
     s = conversationReducer(s, { type: 'final', id: 'a', text: 'I want dosa', timestamp: 1 });
     expect(s.partial).toBeNull();
-    expect(s.lines[0].speakerId).toBe('speaker_2');
+    expect(s.lines).toHaveLength(1);
   });
 
   it('attaches an event to the matching line, updates context, and dedupes by sequenceNumber', () => {
@@ -31,11 +29,16 @@ describe('conversationReducer', () => {
     expect(again.eventOrder).toHaveLength(1);
   });
 
-  it('reset clears everything but keeps the speaker', () => {
-    let s = conversationReducer(initialConversation, { type: 'setSpeaker', speaker: 'speaker_2' });
-    s = conversationReducer(s, { type: 'final', id: 'a', text: 'x', timestamp: 1 });
+  it('does not pin a text-less event (a chosen restaurant) to some other line', () => {
+    let s = conversationReducer(initialConversation, { type: 'final', id: 'a', text: 'hello there', timestamp: 1 });
+    s = conversationReducer(s, { type: 'event', event: ev('s-2', '') });
+    expect(s.lines[0].eventSeq).toBeUndefined();
+    expect(s.eventOrder).toEqual(['s-2']);
+  });
+
+  it('reset clears everything', () => {
+    let s = conversationReducer(initialConversation, { type: 'final', id: 'a', text: 'x', timestamp: 1 });
     s = conversationReducer(s, { type: 'reset' });
     expect(s.lines).toHaveLength(0);
-    expect(s.speaker).toBe('speaker_2');
   });
 });

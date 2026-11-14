@@ -1,5 +1,5 @@
 import { API_BASE } from '../constants';
-import type { HistoryItem, SpeakerId } from '../types';
+import type { HistoryItem } from '../types';
 
 async function post(path: string, body?: unknown): Promise<Response> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -16,8 +16,8 @@ export const api = {
     const res = await post('/sessions');
     return (await res.json()).sessionId as string;
   },
-  sendTranscript(sessionId: string, text: string, speakerId: SpeakerId, confidence = 1, isPartial = false) {
-    return post(`/sessions/${encodeURIComponent(sessionId)}/transcripts`, { text, speakerId, confidence, isPartial });
+  sendTranscript(sessionId: string, text: string, confidence = 1, isPartial = false) {
+    return post(`/sessions/${encodeURIComponent(sessionId)}/transcripts`, { text, confidence, isPartial });
   },
   focus(sessionId: string, restaurantId: string) {
     return post(`/sessions/${encodeURIComponent(sessionId)}/focus`, { restaurantId });

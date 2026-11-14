@@ -33,12 +33,14 @@ shapes are defined by the backend contract; see `src/types/index.ts`.
 | `src/hooks/useConversation.ts` | Session lifecycle, sending transcripts, mic, demo script, focus/reset |
 | `src/hooks/conversationReducer.ts` | Transcript lines per speaker, events deduped by `sequenceNumber`, latest context |
 | `src/hooks/usePopupManager.ts` | Draggable popup position |
-| `src/components/RecordingBar.tsx` | Start/stop, HH:MM:SS timer, live waveform (`AudioVisualizer`), speaker toggle, demo |
+| `src/components/RecordingBar.tsx` | The hero's call to action: start/stop, HH:MM:SS timer, live waveform (`AudioVisualizer`), speaker toggle |
+| `src/components/QuickActions.tsx` | Bottom-right floating button: type a line, play the demo conversation, reset |
 | `src/components/ConversationFeed.tsx` | Chat bubbles per speaker + the system's reaction under each line |
 | `src/components/ContextTracker.tsx` | Location · Cuisine · Dish · Budget · Chosen place |
 | `src/components/RecommendationPopup.tsx` | Glass popup per event; auto-dismisses after 12 s unless hovered |
 | `src/components/RestaurantDetail.tsx` | Answer drawer for the chosen place (price, menu, reviews, contact) |
 | `src/components/HistoryPanel.tsx` | Stored turns for the session (DynamoDB, via the backend) |
+| `src/components/HowItWorks.tsx`, `src/hooks/useReveal.ts` | "Simple as 1, 2, 3" section, fade-in on scroll |
 
 ## Run
 
@@ -69,8 +71,8 @@ npm test             # vitest: formatters, SSE parsing/validation, conversation 
 npm run build        # type-check + production bundle
 ```
 
-**Without a mic:** press **Play demo conversation**. It sends a scripted two-person
-chat through the real API (Basavanagudi → masala dosa → under ₹300 → "tell me about the
+**Without a mic:** open the round orange button in the bottom-right corner and press **Play demo conversation**. It sends a scripted two-person
+chat through the real API (via the backend → Kinesis on Floci → Flink) (Basavanagudi → masala dosa → under ₹300 → "tell me about the
 first one" → price → menu → reviews), 4 s apart. Popups and the context tracker should update after each line.
 
 **With a mic:** open http://localhost:5173 in **Chrome** (the Web Speech API is Chrome-only),

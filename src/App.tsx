@@ -4,18 +4,21 @@ import { ContextTracker } from './components/ContextTracker';
 import { ConversationFeed } from './components/ConversationFeed';
 import { HistoryPanel } from './components/HistoryPanel';
 import { LivePanel } from './components/LivePanel';
-import { ManualInput } from './components/ManualInput';
+import { HowItWorks } from './components/HowItWorks';
+import { QuickActions } from './components/QuickActions';
 import { RecommendationPopup } from './components/RecommendationPopup';
 import { RecordingBar } from './components/RecordingBar';
 import { RestaurantDetail } from './components/RestaurantDetail';
 import { useBackendHealth } from './hooks/useBackendHealth';
 import { useConversation } from './hooks/useConversation';
+import { useReveal } from './hooks/useReveal';
 import type { RecommendationEvent, RestaurantCard } from './types';
 
 export default function App() {
   const c = useConversation();
   const online = useBackendHealth();
   const { state } = c;
+  useReveal();
 
   const [popup, setPopup] = useState<RecommendationEvent | null>(null);
   const [drawerSeq, setDrawerSeq] = useState<string | null>(null);
@@ -62,14 +65,33 @@ export default function App() {
   return (
     <div className="app">
       <header className="hero">
-        <div className="hero-inner">
+        <nav className="nav">
           <div className="brand">
             <span className="logo" aria-hidden="true">🍽</span>
             <span>Omnifood <b>Twin</b></span>
           </div>
-          <h1>Talk about food.<br /><span>We'll find the table.</span></h1>
-          <p className="hero-sub">An always-listening digital twin for Bangalore's 12,000+ restaurants —
-            streamed through Kinesis and Apache Flink as you speak.</p>
+          <ul className="nav-links">
+            <li><a href="#live">Live conversation</a></li>
+            <li><a href="#how">How it works</a></li>
+          </ul>
+        </nav>
+
+        <div className="hero-inner">
+          <h1>Goodbye endless scrolling.<br /><span>Hello table for two.</span></h1>
+          <p className="hero-sub">Talk about food with a friend. An always-listening digital twin streams every sentence
+            through Kinesis and Apache Flink, and pops up the right place from 12,000+ Bangalore restaurants.</p>
+
+          <RecordingBar
+            micState={c.micState}
+            micError={c.micError}
+            speaker={state.speaker}
+            onToggleSpeaker={() => c.dispatch({ type: 'toggleSpeaker' })}
+            onSetSpeaker={(s) => c.dispatch({ type: 'setSpeaker', speaker: s })}
+            onStart={c.startListening}
+            onStop={c.stopListening}
+            disabled={!ready}
+          />
+
           <div className="status-row">
             <span className={`status-badge ${online ? 'ok' : online === false ? 'bad' : ''}`}>
               {online === false ? <WifiOff size={14} /> : <Server size={14} />}
@@ -85,41 +107,41 @@ export default function App() {
 
       {(online === false || c.sessionError) && (
         <div className="banner" role="alert">
-          <b>Backend offline.</b> The pipeline (LocalStack → Flink → backend) isn't reachable on <code>/api</code>.
+          <b>Backend offline.</b> The pipeline (Floci → Flink → backend) isn't reachable on <code>/api</code>.
           Start it, then <button type="button" className="link" onClick={c.createSession}>retry</button>.
         </div>
       )}
       {c.sendError && online !== false && <div className="banner warn" role="alert">{c.sendError}</div>}
 
-      <main className="layout">
-        <div className="col-main">
-          <RecordingBar
-            micState={c.micState}
-            micError={c.micError}
-            speaker={state.speaker}
-            onToggleSpeaker={() => c.dispatch({ type: 'toggleSpeaker' })}
-            onSetSpeaker={(s) => c.dispatch({ type: 'setSpeaker', speaker: s })}
-            onStart={c.startListening}
-            onStop={c.stopListening}
-            onDemo={c.runDemo}
-            demoRunning={c.demoRunning}
-            onReset={c.resetConversation}
-            disabled={!ready}
-          />
-          <ConversationFeed state={state} onOpenEvent={openEvent} />
-          <ManualInput onSend={(t) => c.sendFinal(t, state.speaker)} disabled={!ready} />
+      <section id="live" className="section">
+        <h2 className="section-title reveal">The conversation, live</h2>
+        <p className="section-lead reveal">Both speakers, every sentence, and what the twin made of it.</p>
+        <div className="layout">
+          <div className="col-main reveal">
+            <ConversationFeed state={state} onOpenEvent={openEvent} />
+          </div>
+          <div className="col-side reveal">
+            <ContextTracker context={state.context} focusedName={focused?.name ?? null} latest={state.latest} />
+            <LivePanel lastList={lastList} focusedId={focusedId} onChoose={c.focusRestaurant} />
+            <HistoryPanel sessionId={c.sessionId} />
+          </div>
         </div>
+      </section>
 
-        <div className="col-side">
-          <ContextTracker context={state.context} focusedName={focused?.name ?? null} latest={state.latest} />
-          <LivePanel lastList={lastList} focusedId={focusedId} onChoose={c.focusRestaurant} />
-          <HistoryPanel sessionId={c.sessionId} />
-        </div>
-      </main>
+      <HowItWorks />
 
       <footer className="footer">
-        Data: Zomato Bangalore dataset (Kaggle) · Pipeline: Web Speech → FastAPI → Kinesis → Flink → Kinesis + DynamoDB → SSE
+        <div className="brand"><span className="logo" aria-hidden="true">🍽</span><span>Omnifood <b>Twin</b></span></div>
+        <p>Data: Zomato Bangalore dataset (Kaggle) · Web Speech → FastAPI → Kinesis → Flink → Kinesis + DynamoDB → SSE</p>
       </footer>
+
+      <QuickActions
+        onSend={(t) => c.sendFinal(t, state.speaker)}
+        onDemo={c.runDemo}
+        demoRunning={c.demoRunning}
+        onReset={c.resetConversation}
+        disabled={!ready}
+      />
 
       <RecommendationPopup
         event={popup}

@@ -1,4 +1,4 @@
-import { Mic, MicOff, Play, RotateCcw, Square } from 'lucide-react';
+import { Mic, MicOff, Square } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ConnectionState } from '../utils/persistentSpeechRecognition';
 import { formatDurationHMS } from '../utils/format';
@@ -22,9 +22,6 @@ interface Props {
   onSetSpeaker: (s: SpeakerId) => void;
   onStart: () => void;
   onStop: () => void;
-  onDemo: () => void;
-  demoRunning: boolean;
-  onReset: () => void;
   disabled: boolean;
 }
 
@@ -41,7 +38,7 @@ export function RecordingBar(p: Props) {
   }, [live]);
 
   return (
-    <section className="card recording-bar" aria-label="Listening controls">
+    <section className="recording-bar glass-dark" aria-label="Listening controls">
       <div className="recording-row">
         <button
           type="button"
@@ -66,15 +63,7 @@ export function RecordingBar(p: Props) {
 
       <div className="recording-row secondary">
         <SpeakerToggle speaker={p.speaker} onSet={p.onSetSpeaker} onToggle={p.onToggleSpeaker} />
-        <div className="row-actions">
-          <button type="button" className="btn btn-ghost" onClick={p.onDemo} disabled={p.disabled && !p.demoRunning}>
-            {p.demoRunning ? <Square size={14} /> : <Play size={14} />}
-            {p.demoRunning ? 'Stop demo' : 'Play demo conversation'}
-          </button>
-          <button type="button" className="btn btn-ghost" onClick={p.onReset} title="Clear context and start fresh">
-            <RotateCcw size={14} /> Reset
-          </button>
-        </div>
+        <a className="btn btn-outline-light btn-sm" href="#live">See the conversation ↓</a>
       </div>
 
       {p.micError && <p className="inline-error" role="alert">{p.micError}</p>}

@@ -11,8 +11,9 @@ interface Props {
 }
 
 export function ConversationFeed({ state, onOpenEvent }: Props) {
-  const endRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }); },
+  const scrollRef = useRef<HTMLDivElement>(null);
+  // Scroll only the feed, never the page.
+  useEffect(() => { const el = scrollRef.current; if (el) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' }); },
     [state.lines.length, state.partial?.text, state.eventOrder.length]);
 
   const empty = state.lines.length === 0 && !state.partial;
@@ -24,7 +25,7 @@ export function ConversationFeed({ state, onOpenEvent }: Props) {
         <span className="muted small">{state.lines.length} lines</span>
       </header>
 
-      <div className="feed-scroll" aria-live="polite" aria-relevant="additions">
+      <div ref={scrollRef} className="feed-scroll" aria-live="polite" aria-relevant="additions">
         {empty && (
           <div className="empty">
             <Ear size={28} />
@@ -59,7 +60,6 @@ export function ConversationFeed({ state, onOpenEvent }: Props) {
             </div>
           </div>
         )}
-        <div ref={endRef} />
       </div>
     </section>
   );

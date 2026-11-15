@@ -1,0 +1,35 @@
+/* The only additions to the hotel site: the "Digital Twin Lab" nav pill (shared by / and /digital-twin/). */
+.main-nav li a.nav-lab:link,
+.main-nav li a.nav-lab:visited {
+    display: inline-block;
+    background-color: #e67e22;
+    color: #fff;
+    border: 1px solid #e67e22;
+    border-radius: 200px;
+    padding: 8px 22px;
+    font-size: 90%;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+.main-nav li a.nav-lab:hover,
+.main-nav li a.nav-lab:active {
+    background-color: #cf6d17;
+    border-color: #cf6d17;
+    color: #fff;
+}
+
+/* The hotel hides .main-nav on phones, so the pill gets a phone-only twin in the corner. */
+.nav-lab-mobile:link,
+.nav-lab-mobile:visited { display: none; }
+
+@media only screen and (max-width: 767px) {
+    .nav-lab-mobile:link,
+    .nav-lab-mobile:visited {
+        display: inline-block;
+        position: absolute;
+        top: 24px;
+        right: 4%;
+        margin: 0;
+        padding: 8px 18px;
+        font-size: 80%;
+    }
+}

@@ -1,0 +1,13 @@
+services:
+  ui:
+    build: .
+    ports:
+      - "5173:80"
+    environment:
+      - BACKEND_URL=${BACKEND_URL:-http://backend:8000}
+    restart: unless-stopped
+
+networks:
+  default:
+    name: restaurant-stream-net
+    external: true
